@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>User Registration</title>
+
+    <link rel="stylesheet"
+    href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body class="auth-body">
+
+<div class="auth-box">
+
+    <h1>📚 User Registration</h1>
+
+    <!-- FLASH MESSAGES -->
+
+    {% with messages = get_flashed_messages() %}
+
+        {% if messages %}
+
+            {% for message in messages %}
+
+                <div class="flash-message">
+
+                    {{ message }}
+
+                </div>
+
+            {% endfor %}
+
+        {% endif %}
+
+    {% endwith %}
+
+    <!-- REGISTRATION FORM -->
+
+    <form method="POST">
+
+        <input
+        type="text"
+        name="username"
+        placeholder="Enter Username"
+        required>
+
+        <input
+        type="password"
+        name="password"
+        placeholder="Enter Password"
+        required>
+
+        <button type="submit">
+
+            Register
+
+        </button>
+
+    </form>
+
+    <!-- LOGIN LINK -->
+
+    <a href="/">
+
+        Already have an account? Login
+
+    </a>
+
+</div>
+
+</body>
+</html>

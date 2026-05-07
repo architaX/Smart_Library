@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Librarian Dashboard</title>
+
+    <link rel="stylesheet"
+    href="{{ url_for('static', filename='style.css') }}">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+
+<div class="sidebar">
+
+    <h2>📚 Smart Library</h2>
+
+    <a href="/librarian">
+        Dashboard
+    </a>
+
+    <a href="/logout">
+        Logout
+    </a>
+
+</div>
+
+<!-- MAIN CONTENT -->
+
+<div class="main">
+
+    <!-- TOPBAR -->
+
+    <div class="topbar">
+
+        <h1>
+            Welcome Librarian 👋
+        </h1>
+
+        <div class="clock" id="clock">
+
+        </div>
+
+    </div>
+
+    <!-- ANALYTICS CARDS -->
+
+    <div class="cards">
+
+        <div class="card">
+
+            <h2>Total Books</h2>
+
+            <p>{{ total_books }}</p>
+
+        </div>
+
+        <div class="card">
+
+            <h2>Total Users</h2>
+
+            <p>{{ total_users }}</p>
+
+        </div>
+
+        <div class="card">
+
+            <h2>Issued Books</h2>
+
+            <p>{{ total_issued }}</p>
+
+        </div>
+
+        <div class="card">
+
+            <h2>Overdue</h2>
+
+            <p>{{ overdue_count }}</p>
+
+        </div>
+
+    </div>
+
+    <!-- NOTIFICATIONS -->
+
+    <div class="notification-box">
+
+        <h2 class="notification-bell">
+
+            🔔 Notifications
+
+        </h2>
+
+        {% if notifications %}
+
+            {% for note in notifications %}
+
+                <div class="notification-item">
+
+                    {{ note }}
+
+                </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <p>No notifications</p>
+
+        {% endif %}
+
+    </div>
+
+    <!-- ADD BOOK -->
+
+    <div class="form-container">
+
+        <h2>Add New Book</h2>
+
+        <form method="POST" action="/add_book">
+
+            <input
+            type="text"
+            name="title"
+            placeholder="Book Title"
+            required>
+
+            <input
+            type="text"
+            name="author"
+            placeholder="Author"
+            required>
+
+            <input
+            type="number"
+            name="quantity"
+            placeholder="Quantity"
+            required>
+
+            <button type="submit">
+
+                Add Book
+
+            </button>
+
+        </form>
+
+    </div>
+
+    <!-- SEARCH USER -->
+
+    <div class="form-container">
+
+        <h2>Search Registered User</h2>
+
+        <form method="GET" action="/search_user">
+
+            <input
+            type="text"
+            name="username"
+            placeholder="Enter Username">
+
+            <button type="submit">
+
+                Search
+
+            </button>
+
+        </form>
+
+    </div>
+
+    <!-- ISSUE BOOK -->
+
+    <div class="form-container">
+
+        <h2>Issue Book</h2>
+
+        <form method="POST" action="/issue_book">
+
+            <!-- USER -->
+
+            <select name="user_id" required>
+
+                <option value="">
+
+                    Select User
+
+                </option>
+
+                {% for user in users %}
+
+                <option value="{{ user.id }}">
+
+                    {{ user.username }}
+
+                </option>
+
+                {% endfor %}
+
+            </select>
+
+            <!-- BOOK -->
+
+            <select name="book_id" required>
+
+                <option value="">
+
+                    Select Book
+
+                </option>
+
+                {% for book in books %}
+
+                <option value="{{ book.id }}">
+
+                    {{ book.title }}
+
+                </option>
+
+                {% endfor %}
+
+            </select>
+
+            <!-- DATES -->
+
+            <input
+            type="date"
+            name="issue_date"
+            required>
+
+            <input
+            type="date"
+            name="due_date"
+            required>
+
+            <button type="submit">
+
+                Issue Book
+
+            </button>
+
+        </form>
+
+    </div>
+
+    <!-- INVENTORY -->
+
+    <div class="table-container">
+
+        <h2>Library Inventory</h2>
+
+        <input
+        type="text"
+        id="searchInput"
+        onkeyup="searchBooks()"
+        placeholder="Search books...">
+
+        <table>
+
+            <tr>
+
+                <th>ID</th>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Quantity</th>
+                <th>Status</th>
+                <th>Action</th>
+
+            </tr>
+
+            {% for book in books %}
+
+            <tr>
+
+                <td>{{ book.id }}</td>
+
+                <td>{{ book.title }}</td>
+
+                <td>{{ book.author }}</td>
+
+                <td>{{ book.quantity }}</td>
+
+                <td>
+
+                    {% if book.quantity == 0 %}
+
+                        <span class="overdue">
+
+                            Out Of Stock
+
+                        </span>
+
+                    {% elif book.quantity <= 1 %}
+
+                        <span style="color:orange;font-weight:bold;">
+
+                            Low Stock
+
+                        </span>
+
+                    {% else %}
+
+                        <span class="active">
+
+                            Available
+
+                        </span>
+
+                    {% endif %}
+
+                </td>
+
+                <td>
+
+                    <a
+                    class="delete-btn"
+                    href="/delete_book/{{ book.id }}">
+
+                        Delete
+
+                    </a>
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </table>
+
+    </div>
+
+    <!-- ISSUED BOOKS -->
+
+    <div class="table-container">
+
+        <h2>Issued Books</h2>
+
+        <table>
+
+            <tr>
+
+                <th>User</th>
+                <th>Book</th>
+                <th>Issue Date</th>
+                <th>Due Date</th>
+                <th>Fine</th>
+                <th>Status</th>
+                <th>Action</th>
+
+            </tr>
+
+            {% for issue in issued_books %}
+
+            <tr>
+
+                <td>{{ issue.username }}</td>
+
+                <td>{{ issue.title }}</td>
+
+                <td>{{ issue.issue_date }}</td>
+
+                <td>{{ issue.due_date }}</td>
+
+                <td>
+
+                    ₹{{ issue.fine_amount }}
+
+                </td>
+
+                <td>
+
+                    {% if issue.return_status == "Returned" %}
+
+                        <span class="active">
+
+                            Returned
+
+                        </span>
+
+                    {% elif issue.fine_amount > 0 %}
+
+                        <span class="overdue">
+
+                            Overdue
+
+                        </span>
+
+                    {% else %}
+
+                        <span class="active">
+
+                            Active
+
+                        </span>
+
+                    {% endif %}
+
+                </td>
+
+                <td>
+
+                    <a
+                    class="return-btn"
+                    href="/return_book/{{ issue.id }}">
+
+                        Return
+
+                    </a>
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </table>
+
+    </div>
+
+    <!-- CHART -->
+
+    <div class="chart-container">
+
+        <canvas id="libraryChart"></canvas>
+
+    </div>
+
+</div>
+
+<!-- CHART -->
+
+<script>
+
+const ctx =
+document.getElementById('libraryChart');
+
+new Chart(ctx, {
+
+    type: 'bar',
+
+    data: {
+
+        labels: [
+            'Books',
+            'Users',
+            'Issued',
+            'Overdue'
+        ],
+
+        datasets: [{
+
+            label: 'Library Analytics',
+
+            data: [
+                {{ total_books }},
+                {{ total_users }},
+                {{ total_issued }},
+                {{ overdue_count }}
+            ]
+
+        }]
+    }
+
+});
+
+// CLOCK
+
+function updateClock(){
+
+    const now = new Date();
+
+    document.getElementById("clock")
+    .innerHTML =
+    now.toLocaleTimeString();
+
+}
+
+setInterval(updateClock,1000);
+
+updateClock();
+
+</script>
+
+<!-- JS -->
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>

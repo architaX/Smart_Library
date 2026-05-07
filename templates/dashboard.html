@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1>Dashboard</h1>
+
+<div class="cards">
+
+    <div class="card">
+        <h2>Total Books</h2>
+        <p>{{ total_books }}</p>
+    </div>
+
+    <div class="card">
+        <h2>Issued Books</h2>
+        <p>{{ issued_books }}</p>
+    </div>
+
+    <div class="card">
+        <h2>Users</h2>
+        <p>{{ active_users }}</p>
+    </div>
+
+</div>
+
+<canvas id="myChart"></canvas>
+
+<script>
+
+const ctx = document.getElementById('myChart');
+
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ['Books', 'Issued', 'Users'],
+        datasets: [{
+            label: 'Analytics',
+            data: [
+                {{ total_books }},
+                {{ issued_books }},
+                {{ active_users }}
+            ]
+        }]
+    }
+});
+
+</script>
+
+{% endblock %}

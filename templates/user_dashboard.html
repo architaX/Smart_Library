@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>User Dashboard</title>
+
+    <link rel="stylesheet"
+    href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<div class="sidebar">
+
+    <h2>📚 Smart Library</h2>
+
+    <a href="/user">Dashboard</a>
+    <a href="/logout">Logout</a>
+
+</div>
+
+<div class="main">
+
+    <div class="topbar">
+
+        <h1>
+            Welcome {{ session.username }} 👋
+        </h1>
+
+    </div>
+
+    <!-- NOTIFICATIONS -->
+
+    <div class="notification-box">
+
+        <h2 class="notification-bell">
+            🔔 Notifications
+        </h2>
+
+        {% if notifications %}
+
+            {% for note in notifications %}
+
+                <div class="notification-item">
+                    {{ note }}
+                </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <p>No notifications</p>
+
+        {% endif %}
+
+    </div>
+
+    <!-- SEARCH -->
+
+    <input
+    type="text"
+    id="searchInput"
+    onkeyup="searchBooks()"
+    placeholder="Search available books...">
+
+    <!-- AVAILABLE BOOKS -->
+
+    <div class="table-container">
+
+        <h2>Available Books</h2>
+
+        <table>
+
+            <tr>
+
+                <th>Title</th>
+                <th>Author</th>
+                <th>Quantity</th>
+
+            </tr>
+
+            {% for book in books %}
+
+            <tr>
+
+                <td>{{ book.title }}</td>
+                <td>{{ book.author }}</td>
+                <td>{{ book.quantity }}</td>
+
+            </tr>
+
+            {% endfor %}
+
+        </table>
+
+    </div>
+
+    <!-- BORROWED BOOKS -->
+
+    <div class="table-container">
+
+        <h2>My Borrowed Books</h2>
+
+        <table>
+
+            <tr>
+
+                <th>Book</th>
+                <th>Issue Date</th>
+                <th>Due Date</th>
+                <th>Status</th>
+                <th>Fine</th>
+
+            </tr>
+
+            {% for book in borrowed_books %}
+
+            <tr>
+
+                <td>{{ book.title }}</td>
+
+                <td>{{ book.issue_date }}</td>
+
+                <td>{{ book.due_date }}</td>
+
+                <td>
+
+                    {% if book.fine_amount > 0 %}
+
+                        <span class="overdue">
+                            Overdue
+                        </span>
+
+                    {% else %}
+
+                        <span class="active">
+                            Active
+                        </span>
+
+                    {% endif %}
+
+                </td>
+
+                <td>
+                    ₹{{ book.fine_amount }}
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </table>
+
+    </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>
